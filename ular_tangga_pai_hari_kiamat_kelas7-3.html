@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Petualangan Iman — Ular Tangga PAI Kelas VII</title>
+<style>
+:root{--ink:#24324a;--cream:#fffaf0;--teal:#167c80;--gold:#f4b942;--pink:#f28c9b;--blue:#dff2ff;--green:#dff4df}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#e8f7f4,#fff2df);font-family:system-ui,Arial,sans-serif;color:var(--ink)}
+header{text-align:center;padding:22px 14px 12px}h1{margin:0;color:#126b70;font-size:clamp(1.5rem,4vw,2.4rem)}header p{margin:7px auto;max-width:760px}
+main{max-width:1200px;margin:auto;padding:12px;display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.8fr);gap:16px}
+.panel{background:#ffffffdb;border:2px solid #ffffff;border-radius:20px;padding:14px;box-shadow:0 8px 24px #36505b18}
+.board-wrap{position:relative}.board{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;aspect-ratio:1/1;background:#f4e8d1;padding:7px;border-radius:15px}
+.cell{position:relative;border-radius:8px;min-width:0;display:flex;align-items:flex-start;justify-content:flex-start;padding:3px;font-size:clamp(9px,1.15vw,14px);font-weight:800;border:1px solid #d5c6a7;background:#fffdf7}
+.cell:nth-child(4n){background:#e5f4ef}.cell:nth-child(4n+2){background:#fff0d8}
+.cell .num{z-index:1}.cell .mark{position:absolute;right:3px;bottom:2px;font-size:clamp(11px,1.5vw,18px)}
+.cell .players{position:absolute;left:3px;right:3px;bottom:2px;display:flex;gap:2px;flex-wrap:wrap}
+.piece{font-size:clamp(11px,1.5vw,18px);filter:drop-shadow(0 1px 1px #777)}
+.cell.start{background:#d7f4d8}.cell.finish{background:#ffe5a8;border:2px solid #d99b23}
+.cell.special{outline:2px solid #e3a83d;outline-offset:-2px}
+.controls h2,.panel h2{margin:0 0 10px;color:#126b70;font-size:1.15rem}
+button{border:0;border-radius:12px;padding:11px 14px;font-weight:800;background:#167c80;color:white;cursor:pointer;font-size:1rem}
+button:disabled{opacity:.45;cursor:not-allowed}.secondary{background:#e7f1f2;color:#24545a}.gold{background:#f4b942;color:#47330b}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:9px 0}.row label{font-weight:700}.row input,.row select{padding:9px;border:1px solid #cbd8d8;border-radius:9px;min-width:0}
+.status{background:#e9f7f5;border-radius:12px;padding:10px;margin:10px 0;font-weight:700}
+.dice{font-size:2.5rem;text-align:center;margin:8px}.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:.9rem;margin-top:10px}
+.legend span{white-space:nowrap}.small{font-size:.88rem;color:#536273;line-height:1.45}
+.question{background:#fff4d9;border:1px solid #f0d28b;border-radius:14px;padding:13px;margin:10px 0}.question h3{margin:0 0 8px;font-size:1rem}.answers{display:grid;gap:7px}.answers button{text-align:left;background:#fff;color:#28374c;border:1px solid #d9cda9}.answers button:hover{background:#fff0c5}.answers button.correct{background:#d9f2dc;border-color:#61aa70}.answers button.wrong{background:#ffe0e0;border-color:#d47a7a}
+#log{max-height:150px;overflow:auto;font-size:.88rem;padding-left:20px}.pill{display:inline-block;border-radius:30px;padding:4px 9px;background:#e8efff;font-size:.8rem;font-weight:700}
+footer{text-align:center;padding:16px;color:#667}
+@media(max-width:850px){main{grid-template-columns:1fr}.board{gap:2px;padding:4px}.cell{border-radius:5px;padding:2px}}
+</style></head>
+<body>
+<header><h1>🌙 Petualangan Iman</h1><p><b>Ular Tangga Digital PAI • Kelas VII SMP/MTs</b><br>Materi: Iman kepada Hari Akhir — belajar sambil bermain dengan jujur, tertib, dan gembira.</p></header>
+<main>
+<section class="panel">
+ <div class="row" style="justify-content:space-between"><h2>🎲 Papan permainan 1–100</h2><span class="pill">100 petak</span></div>
+ <div class="board-wrap"><div class="board" id="board" aria-label="Papan ular tangga 100 petak"></div></div>
+ <div class="legend"><span>🪜 Tangga: naik</span><span>🐍 Ular: turun</span><span>🔵 Pemain 1</span><span>🟣 Pemain 2</span><span>🏁 Petak 100: finis</span></div>
+ <p class="small">Nomor bergerak zig-zag: baris terbawah 1–10 dari kiri ke kanan, baris berikutnya 11–20 dari kanan ke kiri, dan seterusnya hingga 100.</p>
+</section>
+<aside class="panel controls">
+ <h2>👥 Siapkan pemain</h2>
+ <div class="row"><label for="p1">Pemain 1</label><input id="p1" value="Pemain 1" maxlength="16"></div>
+ <div class="row"><label for="p2">Pemain 2</label><input id="p2" value="Pemain 2" maxlength="16"></div>
+ <div class="row"><label for="mode">Mode</label><select id="mode"><option value="2">2 pemain</option><option value="1">1 pemain (melawan giliran komputer)</option></select></div>
+ <div class="row"><button id="start" class="secondary">Mulai / Atur ulang</button></div>
+ <div class="status" id="turn">Tekan “Mulai / Atur ulang” untuk bermain.</div>
+ <div class="dice" id="dice">🎲</div>
+ <div class="row"><button id="roll" class="gold" disabled>Lempar dadu</button><button id="next" class="secondary" disabled>Lanjutkan giliran</button></div>
+ <div id="questionBox" class="question" hidden></div>
+ <h2 style="margin-top:16px">📜 Catatan permainan</h2><ol id="log"><li>Permainan siap dimulai.</li></ol>
+ <p class="small"><b>Adil:</b> dadu diacak oleh sistem, urutan pemain bergantian, setiap soal bernilai sama, dan jawaban dinilai otomatis. Tidak ada pengurangan poin karena salah; pemain hanya tidak mendapat bonus langkah.</p>
+</aside>
+<section class="panel" style="grid-column:1/-1">
+ <h2>📖 Aturan permainan</h2>
+ <ol>
+  <li>Permainan dapat dimainkan 2 orang atau 1 orang melawan komputer. Isi nama, pilih mode, lalu tekan <b>Mulai / Atur ulang</b>.</li>
+  <li>Pemain bergiliran menekan <b>Lempar dadu</b>. Bidak bergerak sesuai angka dadu.</li>
+  <li>Jika berhenti di petak soal (ditandai ❓), jawab satu soal pilihan ganda. Jawaban benar mendapat bonus maju 2 petak; jawaban salah tetap di petak tersebut.</li>
+  <li>Jika berhenti di dasar tangga, pemain naik ke petak ujung tangga. Jika berhenti di kepala ular, pemain turun ke petak ekor ular.</li>
+  <li>Untuk menang, pemain harus mencapai petak 100 dengan angka dadu yang tepat. Jika angka melebihi kebutuhan, bidak tidak bergerak.</li>
+  <li>Hormati giliran, jangan mengubah jawaban setelah dipilih, dan jadikan pembahasan sebagai kesempatan belajar bersama.</li>
+ </ol>
+ <p class="small"><b>Catatan guru:</b> 30 soal tersedia di bank soal dan akan muncul bergiliran secara acak tanpa pengulangan sampai seluruh soal terpakai. Setelah itu bank soal diacak kembali.</p>
+</section>
+</main><footer>Media pembelajaran PAI • Iman kepada Hari Akhir • Semangat belajar! ✨</footer>
+<script>
+const ladders={3:22,8:30,20:41,28:55,36:57,51:72,71:92,80:99};
+const snakesReal={17:7,34:12,47:26,62:19,64:60,87:24,93:73,98:79};
+const questions=[
+["Apa yang dimaksud iman kepada hari akhir?","Meyakini bahwa kehidupan dunia akan berakhir dan manusia dibangkitkan untuk mempertanggungjawabkan amal",["Percaya bahwa manusia hidup selamanya","Meyakini dunia tidak akan berubah","Percaya hanya pada kehidupan dunia"]],
+["Hari kiamat disebut juga yaumul...?","Akhir",["Mizan","Jumu’ah","Milad"]],
+["Kiamat yang menghancurkan seluruh alam semesta disebut kiamat...?","Kubra",["Sugra","Wusta","Kecil"]],
+["Kiamat kecil berupa peristiwa...?","Meninggalnya seseorang",["Hancurnya seluruh alam","Ditiupnya sangkakala terakhir","Bumi dan langit lenyap"]],
+["Malaikat yang bertugas meniup sangkakala adalah...?","Israfil",["Jibril","Mikail","Izrail"]],
+["Hari kebangkitan manusia dari alam kubur disebut...?","Yaumul Ba’ats",["Yaumul Hisab","Yaumul Mizan","Yaumul Jaza’"]],
+["Hari dikumpulkannya manusia di Padang Mahsyar disebut...?","Yaumul Hasyr",["Yaumul Ba’ats","Yaumul Fath","Yaumul ‘Id"]],
+["Hari perhitungan amal manusia disebut...?","Yaumul Hisab",["Yaumul Hasyr","Yaumul Ba’ats","Yaumul Maut"]],
+["Penimbangan amal baik dan buruk disebut...?","Yaumul Mizan",["Yaumul Hisab","Yaumul Qiyamah","Yaumul Hasyr"]],
+["Balasan atas seluruh amal manusia disebut...?","Yaumul Jaza’",["Yaumul Ba’ats","Yaumul Mizan","Yaumul Hasyr"]],
+["Tempat penantian manusia setelah meninggal hingga kiamat disebut alam...?","Barzakh",["Dunia","Mahsyar","Mizan"]],
+["Kitab atau catatan amal manusia akan diberikan untuk...?","Menjadi bukti perbuatan selama hidup",["Menghapus semua amal","Menentukan keturunan","Mengganti ibadah"]],
+["Orang yang menerima catatan amal dari sebelah kanan merupakan tanda...?","Keberuntungan dan keselamatan",["Kerugian mutlak","Tidak pernah diuji","Tidak perlu beramal"]],
+["Salah satu hikmah beriman kepada hari akhir adalah...?","Mendorong manusia berbuat baik dan menjauhi maksiat",["Bebas berbuat apa saja","Malas berusaha","Takut menolong orang"]],
+["Contoh perilaku yang mencerminkan iman kepada hari akhir yaitu...?","Jujur meskipun tidak dilihat orang",["Menyontek saat ujian","Mengambil hak teman","Berbohong untuk keuntungan"]],
+["Mengapa manusia harus bertanggung jawab atas amalnya?","Karena setiap amal akan diperhitungkan Allah",["Karena semua amal dilupakan","Karena hanya amal besar dihitung","Karena manusia tidak punya pilihan"]],
+["Hari akhir mengajarkan bahwa kehidupan dunia bersifat...?","Sementara",["Kekal","Tidak berakhir","Tidak memiliki tujuan"]],
+["Sikap yang tepat ketika mengingat hari akhir adalah...?","Memperbanyak amal saleh dan bertobat",["Putus asa","Mengabaikan kewajiban","Menyakiti sesama"]],
+["Apa arti yaumul Ba’ats?","Hari dibangkitkannya manusia",["Hari penimbangan amal","Hari pembalasan","Hari berkumpul"]],
+["Apa arti yaumul Mizan?","Hari penimbangan amal",["Hari kebangkitan","Hari perhitungan","Alam penantian"]],
+["Apa arti yaumul Hisab?","Hari perhitungan amal",["Hari berkumpul","Hari pembalasan","Hari kehancuran"]],
+["Apa arti yaumul Jaza’?","Hari pembalasan",["Hari penantian","Hari kebangkitan","Hari penimbangan"]],
+["Salah satu tanda kiamat sugra adalah...?","Wafatnya seseorang",["Matahari terbit dari barat","Hancurnya seluruh alam","Tiupan sangkakala kehancuran"]],
+["Beriman kepada hari akhir termasuk rukun iman ke...?","Lima",["Dua","Tiga","Enam"]],
+["Rukun iman yang terakhir adalah iman kepada...?","Qada dan qadar",["Malaikat","Kitab-kitab","Hari akhir"]],
+["Sikap adil dalam kehidupan sehari-hari menunjukkan kesadaran bahwa...?","Perbuatan akan dimintai pertanggungjawaban",["Tidak ada balasan","Hanya orang lain dinilai","Aturan tidak penting"]],
+["Ketika menemukan barang milik teman, tindakan terbaik adalah...?","Mengembalikannya kepada pemilik",["Menyimpannya diam-diam","Menjualnya","Membuangnya"]],
+["Mengapa kita dianjurkan segera bertobat?","Karena manusia tidak mengetahui kapan ajal tiba",["Karena dosa tidak berpengaruh","Agar dipuji orang","Supaya bebas dari kewajiban"]],
+["Peristiwa ditiupnya sangkakala menandai...?","Terjadinya peristiwa besar terkait kiamat dan kebangkitan",["Awal tahun hijriah","Pergantian siang malam biasa","Turunnya hujan"]],
+["Bagaimana hubungan iman kepada hari akhir dengan semangat belajar?","Belajar sungguh-sungguh sebagai tanggung jawab dan amal baik",["Tidak perlu belajar","Belajar hanya jika diawasi","Menyontek agar mendapat nilai"]]
+];
+let players=[],turn=0,waiting=false,used=[],lastQ=-1,questionPending=false;
+const board=document.getElementById('board'),turnEl=document.getElementById('turn'),diceEl=document.getElementById('dice'),rollBtn=document.getElementById('roll'),nextBtn=document.getElementById('next'),qBox=document.getElementById('questionBox'),logEl=document.getElementById('log');
+function cellOrder(){let a=[];for(let row=9;row>=0;row--){let nums=Array.from({length:10},(_,i)=>row*10+i+1);if((9-row)%2===1)nums.reverse();a.push(...nums)}return a}
+function buildBoard(){board.innerHTML='';cellOrder().forEach(n=>{let d=document.createElement('div');d.className='cell'+(n===1?' start':'')+(n===100?' finish':'')+((ladders[n]||snakesReal[n])?' special':'');d.id='c'+n;let mark=ladders[n]?'🪜':snakesReal[n]?'🐍':questions.some((_,i)=>[5,10,15,25,32,40,45,53,60,68,75,83,90,96].includes(n))?'❓':'';d.innerHTML='<span class="num">'+n+'</span><span class="mark">'+mark+'</span><div class="players"></div>';board.appendChild(d)})}
+function render(){document.querySelectorAll('.players').forEach(x=>x.innerHTML='');players.forEach((p,i)=>{let spot=document.querySelector('#c'+p.pos+' .players');if(spot){let s=document.createElement('span');s.className='piece';s.textContent=i===0?'🔵':'🟣';s.title=p.name;spot.appendChild(s)}});if(players.length){turnEl.textContent='Giliran: '+players[turn].name+' • Posisi: '+players[turn].pos;rollBtn.disabled=waiting||players.some(p=>p.pos===100);}}
+function addLog(t){let li=document.createElement('li');li.textContent=t;logEl.prepend(li)}
+function reset(){let n1=document.getElementById('p1').value.trim()||'Pemain 1',n2=document.getElementById('p2').value.trim()||'Pemain 2';players=[{name:n1,pos:1},{name:document.getElementById('mode').value==='1'?'Komputer':n2,pos:1}];turn=0;waiting=false;used=[];qBox.hidden=true;diceEl.textContent='🎲';logEl.innerHTML='';addLog('Permainan dimulai. Semoga beruntung!');nextBtn.disabled=true;render()}
+function nextTurn(){turn=1-turn;waiting=false;nextBtn.disabled=true;qBox.hidden=true;render();if(turn===1&&document.getElementById('mode').value==='1'&&!players.some(p=>p.pos===100)){setTimeout(()=>roll(),700)}}
+function roll(){if(waiting||!players.length)return;let p=players[turn],v=Math.floor(Math.random()*6)+1;diceEl.textContent=['⚀','⚁','⚂','⚃','⚄','⚅'][v-1]+'  '+v;let target=p.pos+v;if(target>100){addLog(p.name+' mendapat '+v+', tetapi perlu angka tepat untuk mencapai 100.');waiting=true;nextBtn.disabled=false;rollBtn.disabled=true;return}p.pos=target;addLog(p.name+' melempar '+v+' dan maju ke petak '+target+'.');render();if(ladders[p.pos]){let old=p.pos;p.pos=ladders[old];addLog('Tangga! Naik dari '+old+' ke '+p.pos+'.')}else if(snakesReal[p.pos]){let old=p.pos;p.pos=snakesReal[old];addLog('Awas ular! Turun dari '+old+' ke '+p.pos+'.')}render();if(p.pos===100){turnEl.textContent='🏆 '+p.name+' menang!';rollBtn.disabled=true;nextBtn.disabled=true;waiting=true;return}if([5,10,15,25,32,40,45,53,60,68,75,83,90,96].includes(p.pos)){askQuestion();return}waiting=true;nextBtn.disabled=false;rollBtn.disabled=true}
+function askQuestion(){waiting=true;rollBtn.disabled=true;let idx;if(used.length===questions.length)used=[];let available=questions.map((_,i)=>i).filter(i=>!used.includes(i));idx=available[Math.floor(Math.random()*available.length)];used.push(idx);let q=questions[idx],correct=q[1],opts=[correct,...q[2]].sort(()=>Math.random()-.5);qBox.hidden=false;qBox.innerHTML='<h3>❓ Soal PAI</h3><p>'+q[0]+'</p><div class="answers"></div><p class="small" id="feedback">Pilih satu jawaban.</p>';let ans=qBox.querySelector('.answers');opts.forEach(o=>{let b=document.createElement('button');b.textContent=o;b.onclick=()=>{if(ans.dataset.done)return;ans.dataset.done='1';[...ans.children].forEach(x=>x.disabled=true);if(o===correct){b.classList.add('correct');players[turn].pos=Math.min(100,players[turn].pos+2);document.getElementById('feedback').textContent='Benar! Bonus maju 2 petak. Jawaban: '+correct;addLog('Jawaban benar. Bonus maju 2 petak.')}else{b.classList.add('wrong');[...ans.children].find(x=>x.textContent===correct)?.classList.add('correct');document.getElementById('feedback').textContent='Belum tepat. Jawaban benar: '+correct;addLog('Jawaban belum tepat. Jawaban: '+correct)}render();if(players[turn].pos===100){turnEl.textContent='🏆 '+players[turn].name+' menang!';rollBtn.disabled=true;nextBtn.disabled=true;return}nextBtn.disabled=false};ans.appendChild(b)});}
+document.getElementById('start').onclick=reset;rollBtn.onclick=roll;nextBtn.onclick=nextTurn;document.getElementById('mode').onchange=()=>{if(players.length)reset()};buildBoard();reset();
+</script></body></html>
